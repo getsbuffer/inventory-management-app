@@ -1,4 +1,6 @@
-﻿namespace IM.MAUI
+﻿using Microsoft.Maui.Controls;
+
+namespace IM.MAUI
 {
     public partial class App : Application
     {
