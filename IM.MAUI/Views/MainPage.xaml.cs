@@ -8,7 +8,6 @@ namespace IM.MAUI.Views
         public MainPage()
         {
             InitializeComponent();
-            BindingContext = new MainViewModel();
         }
     }
 }

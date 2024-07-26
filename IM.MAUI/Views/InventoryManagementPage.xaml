@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:IM.MAUI.ViewModels"
+             x:Class="IM.MAUI.Views.InventoryManagementPage">
+
+    <ContentPage.BindingContext>
+        <vm:InventoryManagementViewModel />
+    </ContentPage.BindingContext>
+
+    <StackLayout>
+        <Label Text="Inventory Management" 
+               VerticalOptions="CenterAndExpand" 
+               HorizontalOptions="CenterAndExpand" />
+
+        <Button Text="Create Item" Command="{Binding CreateItemCommand}" />
+        <Button Text="Read Items" Command="{Binding ReadItemsCommand}" />
+        <Button Text="Update Item" Command="{Binding UpdateItemCommand}" />
+        <Button Text="Delete Item" Command="{Binding DeleteItemCommand}" />
+        <Button Text="Back to Main Menu" Command="{Binding NavigateBackCommand}" />
+
+        <ListView ItemsSource="{Binding ShopItems}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextCell Text="{Binding Name}" Detail="{Binding Price}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </StackLayout>
+</ContentPage>

@@ -8,6 +8,10 @@ namespace IM.MAUI
         public AppShell()
         {
             InitializeComponent();
+
+            Routing.RegisterRoute(nameof(InventoryManagementPage), typeof(Views.InventoryManagementPage));
+            Routing.RegisterRoute(nameof(ShopPage), typeof(Views.ShopPage));
+            Routing.RegisterRoute(nameof(CartPage), typeof(Views.CartPage));
         }
     }
 }

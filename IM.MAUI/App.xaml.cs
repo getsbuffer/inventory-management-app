@@ -9,7 +9,7 @@ namespace IM.MAUI
         {
             InitializeComponent();
 
-            MainPage = new MainPage();
+            MainPage = new AppShell();
         }
     }
 }

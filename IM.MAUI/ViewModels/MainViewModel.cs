@@ -1,28 +1,18 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using IM.Library.Models;
-using IM.Library.Services;
+﻿using System.Windows.Input;
+using IM.MAUI.Views;
+using Microsoft.Maui.Controls;
 
 namespace IM.MAUI.ViewModels
 {
-    public class MainViewModel : INotifyPropertyChanged
+    public class MainViewModel
     {
-        private readonly ShopItemService _shopItemService;
-
-        public ObservableCollection<ShopItem> ShopItems { get; set; }
+        public ICommand NavigateToInventoryManagementCommand { get; }
+        public ICommand NavigateToShopCommand { get; }
 
         public MainViewModel()
         {
-            _shopItemService = new ShopItemService();
-            ShopItems = new ObservableCollection<ShopItem>(_shopItemService.GetAllItems());
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            NavigateToInventoryManagementCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(InventoryManagementPage)));
+            NavigateToShopCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(ShopPage)));
         }
     }
 }

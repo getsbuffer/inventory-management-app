@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:IM.MAUI.ViewModels"
+             x:Class="IM.MAUI.Views.ShopPage">
+
+    <ContentPage.BindingContext>
+        <vm:ShopViewModel />
+    </ContentPage.BindingContext>
+
+    <StackLayout>
+        <Label Text="Shop" 
+               VerticalOptions="CenterAndExpand" 
+               HorizontalOptions="CenterAndExpand" />
+
+        <Button Text="Add Item to Cart" Command="{Binding AddItemToCartCommand}" />
+        <Button Text="Remove Item from Cart" Command="{Binding RemoveItemFromCartCommand}" />
+        <Button Text="View Cart" Command="{Binding ViewCartCommand}" />
+        <Button Text="Checkout" Command="{Binding CheckoutCommand}" />
+        <Button Text="Back to Main Menu" Command="{Binding NavigateBackCommand}" />
+
+        <ListView ItemsSource="{Binding ShopItems}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextCell Text="{Binding Name}" Detail="{Binding Price}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </StackLayout>
+</ContentPage>

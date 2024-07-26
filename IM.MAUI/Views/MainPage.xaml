@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="IM.MAUI.Views.MainPage"
-             xmlns:vm="clr-namespace:IM.MAUI.ViewModels">
+             xmlns:vm="clr-namespace:IM.MAUI.ViewModels"
+             x:Class="IM.MAUI.Views.MainPage">
 
     <ContentPage.BindingContext>
         <vm:MainViewModel />
     </ContentPage.BindingContext>
 
     <StackLayout>
-        <Label Text="Inventory Management" 
-               VerticalOptions="CenterAndExpand" 
+        <Label Text="Welcome to Fake Amazon. Our delivery drivers also must relieve themselves in water bottles. Yes we will sell it to you."
+               VerticalOptions="CenterAndExpand"
                HorizontalOptions="CenterAndExpand" />
 
-        <ListView ItemsSource="{Binding ShopItems}">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <TextCell Text="{Binding Name}" Detail="{Binding Price}" />
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+        <Button Text="Inventory Management"
+                Command="{Binding NavigateToInventoryManagementCommand}" />
+
+        <Button Text="Shop"
+                Command="{Binding NavigateToShopCommand}" />
     </StackLayout>
 </ContentPage>
+    

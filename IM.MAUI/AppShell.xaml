@@ -5,4 +5,7 @@
        x:Class="IM.MAUI.AppShell">
 
     <ShellContent Title="Main Page" ContentTemplate="{DataTemplate views:MainPage}" />
+    <ShellContent Title="Inventory Management" ContentTemplate="{DataTemplate views:InventoryManagementPage}" Route="InventoryManagementPage" />
+    <ShellContent Title="Shop" ContentTemplate="{DataTemplate views:ShopPage}" Route="ShopPage" />
+    <ShellContent Title="Cart" ContentTemplate="{DataTemplate views:CartPage}" Route="CartPage" />
 </Shell>
