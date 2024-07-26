@@ -1,4 +1,5 @@
 ﻿using Microsoft.Maui.Controls;
+using IM.MAUI.Views;
 
 namespace IM.MAUI
 {
@@ -7,7 +8,6 @@ namespace IM.MAUI
         public AppShell()
         {
             InitializeComponent();
-            Routing.RegisterRoute(nameof(MainPage), typeof(MainPage));
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Maui.Controls;
+using IM.MAUI.Views;
 
 namespace IM.MAUI
 {
@@ -8,7 +9,7 @@ namespace IM.MAUI
         {
             InitializeComponent();
 
-            MainPage = new AppShell();
+            MainPage = new MainPage();
         }
     }
 }

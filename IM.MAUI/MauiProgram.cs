@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using IM.Library.Services;
+using Microsoft.Extensions.Logging;
 
 namespace IM.MAUI
 {
@@ -18,6 +19,8 @@ namespace IM.MAUI
 #if DEBUG
     		builder.Logging.AddDebug();
 #endif
+            builder.Services.AddSingleton<ShopItemService>();
+            builder.Services.AddSingleton(ShoppingCartProxy.Instance);
 
             return builder.Build();
         }
