@@ -1,5 +1,8 @@
-﻿using IM.Library.Services;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui;
+using Microsoft.Maui.Hosting;
+using Microsoft.Maui.Controls.Hosting;
+using IM.Library.Services;
 
 namespace IM.MAUI
 {
@@ -13,12 +16,8 @@ namespace IM.MAUI
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-#if DEBUG
-    		builder.Logging.AddDebug();
-#endif
             builder.Services.AddSingleton<ShopItemService>();
             builder.Services.AddSingleton(ShoppingCartProxy.Instance);
 
