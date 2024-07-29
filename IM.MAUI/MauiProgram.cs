@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using IM.Library.Services;
+using IM.MAUI.ViewModels;
 
 namespace IM.MAUI
 {
@@ -12,12 +13,11 @@ namespace IM.MAUI
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-#if DEBUG
-    		builder.Logging.AddDebug();
-#endif
+            builder.Services.AddSingleton<ShopItemService>();
+            builder.Services.AddSingleton(ShoppingCartProxy.Instance);
+            builder.Services.AddTransient<InventoryManagementViewModel>();
 
             return builder.Build();
         }

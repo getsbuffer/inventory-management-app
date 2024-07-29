@@ -1,4 +1,7 @@
 using IM.Library.Models;
+using System.Globalization;
+using CsvHelper;
+using CsvHelper.Configuration;
 
 namespace IM.Library.Services
 {
@@ -9,6 +12,7 @@ namespace IM.Library.Services
         void AddItem(ShopItem item);
         void UpdateItem(ShopItem item);
         void DeleteItem(int id);
+        void ImportItemsFromCsv(string filePath);
     }
     public class ShopItemService : IShopItemService
     {
@@ -40,13 +44,30 @@ namespace IM.Library.Services
             }
         }
 
-    public void DeleteItem(int id)
-    {
-        var item = GetItemById(id);
-        if (item != null)
+        public void DeleteItem(int id)
         {
-            _items.Remove(item);
+            var item = GetItemById(id);
+            if (item != null)
+            {
+                _items.Remove(item);
+            }
         }
-    }
+        public void ImportItemsFromCsv(string filePath)
+        {
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = true,
+            };
+
+            using (var reader = new StreamReader(filePath))
+            using (var csv = new CsvReader(reader, config))
+            {
+                var records = csv.GetRecords<ShopItem>();
+                foreach (var item in records)
+                {
+                    AddItem(item);
+                }
+            }
+        }
     }
 }

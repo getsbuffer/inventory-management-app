@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="IM.MAUI.Views.InventoryManagementPage">
+    <ScrollView>
+        <VerticalStackLayout>
+            <Label Text="Inventory Management" 
+                   VerticalOptions="Start"
+                   HorizontalOptions="Center"
+                   Margin="10" />
+
+            <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="Center">
+                <Button Text="Create Item" Command="{Binding CreateItemCommand}" Margin="10" />
+                <Button Text="Read Items" Command="{Binding ReadItemsCommand}" Margin="10" />
+                <Button Text="Update Item" Command="{Binding UpdateItemCommand}" Margin="10" />
+                <Button Text="Delete Item" Command="{Binding DeleteItemCommand}" Margin="10" />
+                <Button Text="Back to Main Menu" Command="{Binding NavigateToMainMenuCommand}" Margin="10" />
+            </VerticalStackLayout>
+
+            <ListView ItemsSource="{Binding ShopItems}" Margin="10" SelectedItem="{Binding SelectedShopItem}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <StackLayout Padding="10">
+                                <Label Text="ID:" FontAttributes="Bold" />
+                                <Label Text="{Binding Id}" />
+                                <Label Text="Name:" FontAttributes="Bold" />
+                                <Label Text="{Binding Name}" />
+                                <Label Text="Description:" FontAttributes="Bold" />
+                                <Label Text="{Binding Desc}" />
+                                <Label Text="Price:" FontAttributes="Bold" />
+                                <Label Text="{Binding Price, StringFormat='{0:C}'}" />
+                                <Label Text="Stock:" FontAttributes="Bold" />
+                                <Label Text="{Binding Amount}" />
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </VerticalStackLayout>
+    </ScrollView>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Options" Command="{Binding ShowMenuCommand}" />
+    </ContentPage.ToolbarItems>
+</ContentPage>

@@ -52,7 +52,14 @@ namespace IM.Library.Services
             var cartItem = _cart.Items.FirstOrDefault(i => i.Item?.Id == itemId);
             if (cartItem != null)
             {
-                _cart.Items.Remove(cartItem);
+                if (cartItem.Amount > 1)
+                {
+                    cartItem.Amount--;
+                }
+                else
+                {
+                    _cart.Items.Remove(cartItem);
+                }
             }
         }
 

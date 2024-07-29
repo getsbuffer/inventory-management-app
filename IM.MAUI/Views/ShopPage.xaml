@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="IM.MAUI.Views.ShopPage">
+
+    <ScrollView>
+        <VerticalStackLayout>
+            <Label Text="Shop" 
+                   VerticalOptions="Start"
+                   HorizontalOptions="Center"
+                   Margin="10" />
+
+            <Label x:Name="NotificationLabel"
+                   Text="{Binding NotificationMessage}"
+                   TextColor="Green"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   IsVisible="{Binding IsNotificationVisible}"
+                   Margin="10"/>
+
+            <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="Center">
+                <Button Text="Add Item to Cart" Command="{Binding AddItemToCartCommand}" Margin="10" />
+                <Button Text="Remove Item from Cart" Command="{Binding RemoveItemFromCartCommand}" Margin="10" />
+                <Button Text="View Cart" Command="{Binding ViewCartCommand}" Margin="10" />
+                <Button Text="Back to Main Menu" Command="{Binding NavigateToMainMenuCommand}" Margin="10" />
+            </VerticalStackLayout>
+
+            <ListView ItemsSource="{Binding ShopItems}" Margin="10" SelectedItem="{Binding SelectedShopItem}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <StackLayout Padding="10">
+                                <Label Text="ID:" FontAttributes="Bold" />
+                                <Label Text="{Binding Id}" />
+                                <Label Text="Name:" FontAttributes="Bold" />
+                                <Label Text="{Binding Name}" />
+                                <Label Text="Description:" FontAttributes="Bold" />
+                                <Label Text="{Binding Desc}" />
+                                <Label Text="Price:" FontAttributes="Bold" />
+                                <Label Text="{Binding Price, StringFormat='{0:C}'}" />
+                                <Label Text="Stock:" FontAttributes="Bold" />
+                                <Label Text="{Binding Amount}" />
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Label Text="{Binding TotalPrice, StringFormat='Total: {0:C}'}" 
+                   VerticalOptions="Center"
+                   HorizontalOptions="Center"
+                   Margin="10" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

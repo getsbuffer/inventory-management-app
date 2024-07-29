@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:IM.MAUI.ViewModels"
+             x:Class="IM.MAUI.Views.CartPage">
+
+    <ContentPage.BindingContext>
+        <vm:CartViewModel />
+    </ContentPage.BindingContext>
+
+    <ScrollView>
+        <VerticalStackLayout>
+            <Label Text="Shopping Cart" 
+                   VerticalOptions="Start"
+                   HorizontalOptions="Center"
+                   Margin="10" />
+
+            <Label x:Name="NotificationLabel"
+                   Text="{Binding NotificationMessage}"
+                   TextColor="Green"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   IsVisible="{Binding IsNotificationVisible}"
+                   Margin="10"/>
+
+            <ListView ItemsSource="{Binding CartItems}" Margin="10" SelectedItem="{Binding SelectedCartItem}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <StackLayout Padding="10">
+                                <Label Text="{Binding Item.Name}" FontAttributes="Bold" />
+                                <Label Text="{Binding Item.Desc}" />
+                                <Label Text="{Binding Item.Price, StringFormat='Price: {0:C}'}" />
+                                <Label Text="{Binding Amount, StringFormat='Amount: {0}'}" />
+                                <Label Text="{Binding TotalPrice, StringFormat='Total: {0:C}'}" />
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Label Text="{Binding TotalPrice, StringFormat='Total: {0:C}'}" 
+                   VerticalOptions="Center"
+                   HorizontalOptions="Center"
+                   Margin="10" />
+
+            <Button Text="Checkout" Command="{Binding CheckoutCommand}" Margin="10" />
+            <Button Text="Back to Shop" Command="{Binding NavigateToShopCommand}" Margin="10" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

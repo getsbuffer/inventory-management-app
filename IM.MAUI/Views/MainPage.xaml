@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:IM.MAUI.ViewModels"
+             x:Class="IM.MAUI.Views.MainPage">
+
+    <ContentPage.BindingContext>
+        <vm:MainViewModel />
+    </ContentPage.BindingContext>
+
+    <VerticalStackLayout>
+        <Label Text="Welcome to fake Amazon. You may manage the inventory or buy"
+               VerticalOptions="Start"
+               HorizontalOptions="Center" 
+               Margin="10"/>
+
+        <VerticalStackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="Center">
+            <Button Text="Inventory Management"
+                    Command="{Binding NavigateToInventoryManagementCommand}"
+                    Margin="10" />
+
+            <Button Text="Shop"
+                    Command="{Binding NavigateToShopCommand}"
+                    Margin="10" />
+        </VerticalStackLayout>
+    </VerticalStackLayout>
+</ContentPage>
+    
