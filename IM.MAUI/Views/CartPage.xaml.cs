@@ -1,6 +1,4 @@
-﻿using Microsoft.Maui.Controls;
-
-namespace IM.MAUI.Views
+﻿namespace IM.MAUI.Views
 {
     public partial class CartPage : ContentPage
     {

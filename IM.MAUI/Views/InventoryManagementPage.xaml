@@ -14,7 +14,7 @@
                 <Button Text="Read Items" Command="{Binding ReadItemsCommand}" Margin="10" />
                 <Button Text="Update Item" Command="{Binding UpdateItemCommand}" Margin="10" />
                 <Button Text="Delete Item" Command="{Binding DeleteItemCommand}" Margin="10" />
-                <Button Text="Back to Main Menu" Command="{Binding NavigateBackCommand}" Margin="10" />
+                <Button Text="Back to Main Menu" Command="{Binding NavigateToMainMenuCommand}" Margin="10" />
             </VerticalStackLayout>
 
             <ListView ItemsSource="{Binding ShopItems}" Margin="10" SelectedItem="{Binding SelectedShopItem}">
@@ -39,4 +39,7 @@
             </ListView>
         </VerticalStackLayout>
     </ScrollView>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Options" Command="{Binding ShowMenuCommand}" />
+    </ContentPage.ToolbarItems>
 </ContentPage>

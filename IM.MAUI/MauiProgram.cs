@@ -1,8 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Maui;
-using Microsoft.Maui.Hosting;
-using Microsoft.Maui.Controls.Hosting;
-using IM.Library.Services;
+﻿using IM.Library.Services;
+using IM.MAUI.ViewModels;
 
 namespace IM.MAUI
 {
@@ -20,6 +17,7 @@ namespace IM.MAUI
 
             builder.Services.AddSingleton<ShopItemService>();
             builder.Services.AddSingleton(ShoppingCartProxy.Instance);
+            builder.Services.AddTransient<InventoryManagementViewModel>();
 
             return builder.Build();
         }

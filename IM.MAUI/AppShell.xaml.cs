@@ -1,5 +1,4 @@
-﻿using Microsoft.Maui.Controls;
-using IM.MAUI.Views;
+﻿using IM.MAUI.Views;
 
 namespace IM.MAUI
 {

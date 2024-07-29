@@ -1,9 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.Maui.Controls;
 using IM.Library.Models;
 using IM.Library.Services;
 using IM.MAUI.Views;

@@ -1,12 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Windows.Input;
-using Microsoft.Maui.Controls;
 using IM.Library.Models;
 using IM.Library.Services;
 using IM.MAUI.Views;
+
 
 namespace IM.MAUI.ViewModels
 {
@@ -66,7 +65,6 @@ namespace IM.MAUI.ViewModels
         public ICommand RemoveItemFromCartCommand { get; }
         public ICommand ViewCartCommand { get; }
         public ICommand CheckoutCommand { get; }
-        public ICommand NavigateBackCommand { get; }
         public ICommand NavigateToMainMenuCommand { get; }
 
         public ShopViewModel(ShopItemService shopItemService, ShoppingCartProxy shoppingCartProxy)
@@ -82,6 +80,7 @@ namespace IM.MAUI.ViewModels
             CheckoutCommand = new Command(Checkout);
             NavigateToMainMenuCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(MainPage)));
         }
+
 
         private async void AddItemToCart()
         {

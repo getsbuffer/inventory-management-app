@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using Microsoft.Maui.Controls;
 using IM.Library.Models;
 using IM.Library.Services;
 using IM.MAUI.Views;
@@ -30,8 +29,9 @@ namespace IM.MAUI.ViewModels
         public ICommand ReadItemsCommand { get; }
         public ICommand UpdateItemCommand { get; }
         public ICommand DeleteItemCommand { get; }
-        public ICommand NavigateBackCommand { get; }
         public ICommand NavigateToMainMenuCommand { get; }
+        public ICommand ShowMenuCommand { get; }
+        public ICommand ImportCsvCommand { get; }
 
         public InventoryManagementViewModel(ShopItemService shopItemService)
         {
@@ -42,8 +42,52 @@ namespace IM.MAUI.ViewModels
             ReadItemsCommand = new Command(ReadItems);
             UpdateItemCommand = new Command(UpdateItem);
             DeleteItemCommand = new Command(DeleteItem);
-            NavigateBackCommand = new Command(async () => await Shell.Current.GoToAsync(".."));
-            NavigateToMainMenuCommand = new Command(async () => await Shell.Current.GoToAsync($"//{nameof(MainPage)}"));
+            NavigateToMainMenuCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(MainPage)));
+            ShowMenuCommand = new Command(async () => await ShowMenu());
+            ImportCsvCommand = new Command(async () => await ImportCsv());
+        }
+        private async Task ShowMenu()
+        {
+            var action = await Application.Current.MainPage.DisplayActionSheet("Options", "Cancel", null, "Import CSV");
+
+            if (action == "Import CSV")
+            {
+                await ImportCsv();
+            }
+        }
+
+        private async Task ImportCsv()
+        {
+            string filePath = await PickCsvFileAsync();
+            if (filePath != null)
+            {
+                _shopItemService.ImportItemsFromCsv(filePath);
+                ReadItems();
+            }
+        }
+
+        public async Task<string> PickCsvFileAsync()
+        {
+            try
+            {
+                var result = await FilePicker.PickAsync(new PickOptions
+                {
+                    PickerTitle = "Pick a CSV file",
+                    FileTypes = new Microsoft.Maui.Storage.FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+                    {
+                        { DevicePlatform.WinUI, new[] { ".csv" } }
+                    })
+                });
+
+                if (result == null)
+                    return null;
+
+                return result.FullPath;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
         private async void CreateItem()

@@ -28,5 +28,9 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>NSDocumentsUsageDescription</key>
+	<string>Needs access to documents for file picking.</string>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 </dict>
 </plist>

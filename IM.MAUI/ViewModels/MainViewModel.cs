@@ -1,8 +1,5 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using IM.MAUI.Views;
-using Microsoft.Maui.Controls;
 
 namespace IM.MAUI.ViewModels
 {
