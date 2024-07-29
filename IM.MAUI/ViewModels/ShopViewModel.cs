@@ -2,10 +2,10 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using IM.Library.DTO;
 using IM.Library.Models;
 using IM.Library.Services;
 using IM.MAUI.Views;
-
 
 namespace IM.MAUI.ViewModels
 {
@@ -14,11 +14,11 @@ namespace IM.MAUI.ViewModels
         private readonly ShopItemService _shopItemService;
         private readonly ShoppingCartProxy _shoppingCartProxy;
 
-        public ObservableCollection<ShopItem> ShopItems { get; set; }
+        public ObservableCollection<ShopItemDTO> ShopItems { get; set; }
         public ObservableCollection<ShoppingCartItem> CartItems { get; set; }
 
-        private ShopItem _selectedShopItem;
-        public ShopItem SelectedShopItem
+        private ShopItemDTO _selectedShopItem;
+        public ShopItemDTO SelectedShopItem
         {
             get => _selectedShopItem;
             set
@@ -71,7 +71,7 @@ namespace IM.MAUI.ViewModels
         {
             _shopItemService = shopItemService;
             _shoppingCartProxy = shoppingCartProxy;
-            ShopItems = new ObservableCollection<ShopItem>(_shopItemService.GetAllItems());
+            ShopItems = new ObservableCollection<ShopItemDTO>(_shopItemService.GetAllItems());
             CartItems = new ObservableCollection<ShoppingCartItem>(_shoppingCartProxy.GetCart().Items);
 
             AddItemToCartCommand = new Command(AddItemToCart);
@@ -86,7 +86,7 @@ namespace IM.MAUI.ViewModels
         {
             if (SelectedShopItem != null)
             {
-                int amount = 1; 
+                int amount = 1;
                 var item = _shopItemService.GetItemById(SelectedShopItem.Id);
 
                 if (item == null)
@@ -101,8 +101,8 @@ namespace IM.MAUI.ViewModels
                 }
 
                 _shoppingCartProxy.AddItemToCart(item, amount);
-                item.Amount -= amount; 
-                _shopItemService.UpdateItem(item); 
+                item.Amount -= amount;
+                _shopItemService.UpdateItem(item);
                 UpdateCartItems();
                 await ShowNotification("Item added to cart");
             }
@@ -112,7 +112,7 @@ namespace IM.MAUI.ViewModels
         {
             if (SelectedShopItem != null)
             {
-                int amount = 1; 
+                int amount = 1;
                 var item = _shopItemService.GetItemById(SelectedShopItem.Id);
 
                 if (item == null)
@@ -127,10 +127,9 @@ namespace IM.MAUI.ViewModels
                     return;
                 }
 
-
                 _shoppingCartProxy.RemoveItemFromCart(SelectedShopItem.Id);
-                item.Amount += amount; 
-                _shopItemService.UpdateItem(item); 
+                item.Amount += amount;
+                _shopItemService.UpdateItem(item);
                 UpdateCartItems();
                 await ShowNotification("Item removed from cart");
             }
@@ -170,7 +169,7 @@ namespace IM.MAUI.ViewModels
             NotificationMessage = message;
             IsNotificationVisible = true;
             OnPropertyChanged(nameof(NotificationMessage));
-            await Task.Delay(2000); 
+            await Task.Delay(2000);
             IsNotificationVisible = false;
             NotificationMessage = string.Empty;
             OnPropertyChanged(nameof(NotificationMessage));

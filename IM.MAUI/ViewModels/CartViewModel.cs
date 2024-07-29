@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using IM.Library.DTO;
 using IM.Library.Models;
 using IM.Library.Services;
 using IM.MAUI.Views;
@@ -135,7 +136,7 @@ namespace IM.MAUI.ViewModels
                 }
                 else
                 {
-                    _shopItemService.AddItem(new ShopItem
+                    _shopItemService.AddItem(new ShopItemDTO
                     {
                         Id = item.Item.Id,
                         Name = item.Item.Name,

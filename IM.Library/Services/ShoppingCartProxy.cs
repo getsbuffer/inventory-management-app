@@ -1,4 +1,6 @@
 using IM.Library.Models;
+using IM.Library.DTO;
+using IM.Library.Helpers;
 
 namespace IM.Library.Services
 {
@@ -60,8 +62,9 @@ namespace IM.Library.Services
             }
         }
 
-        public void AddItemToCart(ShopItem item, int amount)
+        public void AddItemToCart(ShopItemDTO itemDto, int amount)
         {
+            var item = MappingHelper.ToModel(itemDto);
             var cartItem = _cart.Items.FirstOrDefault(i => i.Item?.Id == item.Id);
             if (cartItem == null)
             {
@@ -108,15 +111,16 @@ namespace IM.Library.Services
         {
             foreach (var item in _cart.Items)
             {
-                var shopItem = _shopItemService.GetItemById(item.Item.Id);
-                if (shopItem != null)
+                var shopItemDto = _shopItemService.GetItemById(item.Item.Id);
+                if (shopItemDto != null)
                 {
+                    var shopItem = MappingHelper.ToModel(shopItemDto);
                     shopItem.Amount += item.Amount;
-                    _shopItemService.UpdateItem(shopItem);
+                    _shopItemService.UpdateItem(MappingHelper.ToDTO(shopItem));
                 }
                 else
                 {
-                    _shopItemService.AddItem(new ShopItem
+                    var newItemDto = MappingHelper.ToDTO(new ShopItem
                     {
                         Id = item.Item.Id,
                         Name = item.Item.Name,
@@ -125,6 +129,7 @@ namespace IM.Library.Services
                         Amount = item.Amount,
                         IsBogo = item.Item.IsBogo
                     });
+                    _shopItemService.AddItem(newItemDto);
                 }
             }
         }
