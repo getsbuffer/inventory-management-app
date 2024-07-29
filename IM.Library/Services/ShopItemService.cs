@@ -41,6 +41,7 @@ namespace IM.Library.Services
                 existingItem.Desc = item.Desc;
                 existingItem.Price = item.Price;
                 existingItem.Amount = item.Amount;
+                existingItem.IsBogo = item.IsBogo;
             }
         }
 
@@ -57,6 +58,8 @@ namespace IM.Library.Services
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 HasHeaderRecord = true,
+                HeaderValidated = null,
+                MissingFieldFound = null
             };
 
             using (var reader = new StreamReader(filePath))

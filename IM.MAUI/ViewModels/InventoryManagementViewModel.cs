@@ -35,6 +35,7 @@ namespace IM.MAUI.ViewModels
         public ICommand ShowMenuCommand { get; }
         public ICommand ImportCsvCommand { get; }
         public ICommand ConfigureTaxRateCommand { get; }
+        public ICommand ConfigureBogoCommand { get; }
 
         public InventoryManagementViewModel(ShopItemService shopItemService)
         {
@@ -50,11 +51,12 @@ namespace IM.MAUI.ViewModels
             ShowMenuCommand = new Command(async () => await ShowMenu());
             ImportCsvCommand = new Command(async () => await ImportCsv());
             ConfigureTaxRateCommand = new Command(async () => await ConfigureTaxRate());
+            ConfigureBogoCommand = new Command(async () => await ConfigureBogo());
         }
 
         private async Task ShowMenu()
         {
-            var action = await Application.Current.MainPage.DisplayActionSheet("Options", "Cancel", null, "Import CSV", "Configure Tax Rate");
+            var action = await Application.Current.MainPage.DisplayActionSheet("Options", "Cancel", null, "Import CSV", "Configure Tax Rate", "Configure BOGO");
 
             if (action == "Import CSV")
             {
@@ -63,6 +65,10 @@ namespace IM.MAUI.ViewModels
             else if (action == "Configure Tax Rate")
             {
                 await ConfigureTaxRate();
+            }
+            else if (action == "Configure BOGO")
+            {
+                await ConfigureBogo();
             }
         }
 
@@ -85,7 +91,21 @@ namespace IM.MAUI.ViewModels
                 _shoppingCartProxy.TaxRate = taxRate;
             }
         }
+        private async Task ConfigureBogo()
+        {
+            string result = await Application.Current.MainPage.DisplayPromptAsync("Configure BOGO", "Enter the ID of the item to make BOGO:");
 
+            if (int.TryParse(result, out int itemId))
+            {
+                var item = _shopItemService.GetItemById(itemId);
+                if (item != null)
+                {
+                    item.IsBogo = true;
+                    _shopItemService.UpdateItem(item);
+                    ReadItems();
+                }
+            }
+        }
         public async Task<string> PickCsvFileAsync()
         {
             try

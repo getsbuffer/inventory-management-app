@@ -10,6 +10,7 @@ namespace IM.Library.Models
         private string _desc;
         private decimal _price;
         private int _amount;
+        public bool _isbogo = false;
 
         public int Id
         {
@@ -57,6 +58,15 @@ namespace IM.Library.Models
             set
             {
                 _amount = value;
+                OnPropertyChanged();
+            }
+        }
+        public bool IsBogo
+        {
+            get => _isbogo;
+            set
+            {
+                _isbogo = value;
                 OnPropertyChanged();
             }
         }
