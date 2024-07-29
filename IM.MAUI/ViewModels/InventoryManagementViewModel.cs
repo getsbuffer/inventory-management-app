@@ -36,6 +36,7 @@ namespace IM.MAUI.ViewModels
         public ICommand ImportCsvCommand { get; }
         public ICommand ConfigureTaxRateCommand { get; }
         public ICommand ConfigureBogoCommand { get; }
+        public ICommand MarkDownItemCommand { get; }
 
         public InventoryManagementViewModel(ShopItemService shopItemService)
         {
@@ -52,11 +53,12 @@ namespace IM.MAUI.ViewModels
             ImportCsvCommand = new Command(async () => await ImportCsv());
             ConfigureTaxRateCommand = new Command(async () => await ConfigureTaxRate());
             ConfigureBogoCommand = new Command(async () => await ConfigureBogo());
+            MarkDownItemCommand = new Command(async () => await MarkDownItem());
         }
 
         private async Task ShowMenu()
         {
-            var action = await Application.Current.MainPage.DisplayActionSheet("Options", "Cancel", null, "Import CSV", "Configure Tax Rate", "Configure BOGO");
+            var action = await Application.Current.MainPage.DisplayActionSheet("Options", "Cancel", null, "Import CSV", "Configure Tax Rate", "Configure BOGO", "Mark down an item");
 
             if (action == "Import CSV")
             {
@@ -69,6 +71,10 @@ namespace IM.MAUI.ViewModels
             else if (action == "Configure BOGO")
             {
                 await ConfigureBogo();
+            }
+            else if (action == "Mark down an item")
+            {
+                await MarkDownItem();
             }
         }
 
@@ -104,6 +110,28 @@ namespace IM.MAUI.ViewModels
                     _shopItemService.UpdateItem(item);
                     ReadItems();
                 }
+            }
+        }
+        private async Task MarkDownItem()
+        {
+            string idResult = await Application.Current.MainPage.DisplayPromptAsync("Mark Down Item", "Enter the ID of the item to mark down:");
+            if (!int.TryParse(idResult, out int itemId))
+            {
+                return;
+            }
+
+            string percentResult = await Application.Current.MainPage.DisplayPromptAsync("Mark Down Item", "Enter the percentage to mark down (e.g., 0.10 for 10%):");
+            if (!decimal.TryParse(percentResult, out decimal markdownPercentage))
+            {
+                return;
+            }
+
+            var item = _shopItemService.GetItemById(itemId);
+            if (item != null)
+            {
+                item.Price -= item.Price * markdownPercentage;
+                _shopItemService.UpdateItem(item);
+                ReadItems();
             }
         }
         public async Task<string> PickCsvFileAsync()
