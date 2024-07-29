@@ -4,9 +4,6 @@
              xmlns:vm="clr-namespace:IM.MAUI.ViewModels"
              x:Class="IM.MAUI.Views.CartPage">
 
-    <ContentPage.BindingContext>
-        <vm:CartViewModel />
-    </ContentPage.BindingContext>
 
     <ScrollView>
         <VerticalStackLayout>
@@ -45,6 +42,14 @@
                    Margin="10" />
 
             <Button Text="Checkout" Command="{Binding CheckoutCommand}" Margin="10" />
+			<Button Text="Save as Wishlist" Command="{Binding SaveWishlistCommand}" Margin="10" />
+			<Button Text="Load a Wishlist" Command="{Binding LoadWishlistCommand}" Margin="10" />
+			<Label Text="{Binding NotificationMessage}"
+	            TextColor="Green"
+	            HorizontalOptions="Center"
+	            VerticalOptions="Center"
+	            IsVisible="{Binding IsNotificationVisible}"
+	            Margin="10" />
             <Button Text="Back to Shop" Command="{Binding NavigateToShopCommand}" Margin="10" />
         </VerticalStackLayout>
     </ScrollView>

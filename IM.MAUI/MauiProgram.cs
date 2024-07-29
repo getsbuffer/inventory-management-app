@@ -16,8 +16,9 @@ namespace IM.MAUI
                 });
 
             builder.Services.AddSingleton<ShopItemService>();
-            builder.Services.AddSingleton(ShoppingCartProxy.Instance);
+            builder.Services.AddSingleton<ShoppingCartProxy>(); 
             builder.Services.AddTransient<InventoryManagementViewModel>();
+            builder.Services.AddTransient<CartViewModel>();
 
             return builder.Build();
         }
