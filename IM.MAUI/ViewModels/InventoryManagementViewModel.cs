@@ -11,6 +11,8 @@ namespace IM.MAUI.ViewModels
     public class InventoryManagementViewModel : INotifyPropertyChanged
     {
         private readonly ShopItemService _shopItemService;
+        private readonly ShoppingCartProxy _shoppingCartProxy;
+        private decimal _taxRate;
 
         public ObservableCollection<ShopItem> ShopItems { get; set; }
 
@@ -32,10 +34,12 @@ namespace IM.MAUI.ViewModels
         public ICommand NavigateToMainMenuCommand { get; }
         public ICommand ShowMenuCommand { get; }
         public ICommand ImportCsvCommand { get; }
+        public ICommand ConfigureTaxRateCommand { get; }
 
         public InventoryManagementViewModel(ShopItemService shopItemService)
         {
             _shopItemService = shopItemService;
+            _shoppingCartProxy = ShoppingCartProxy.Instance;
             ShopItems = new ObservableCollection<ShopItem>(_shopItemService.GetAllItems());
 
             CreateItemCommand = new Command(CreateItem);
@@ -45,14 +49,20 @@ namespace IM.MAUI.ViewModels
             NavigateToMainMenuCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(MainPage)));
             ShowMenuCommand = new Command(async () => await ShowMenu());
             ImportCsvCommand = new Command(async () => await ImportCsv());
+            ConfigureTaxRateCommand = new Command(async () => await ConfigureTaxRate());
         }
+
         private async Task ShowMenu()
         {
-            var action = await Application.Current.MainPage.DisplayActionSheet("Options", "Cancel", null, "Import CSV");
+            var action = await Application.Current.MainPage.DisplayActionSheet("Options", "Cancel", null, "Import CSV", "Configure Tax Rate");
 
             if (action == "Import CSV")
             {
                 await ImportCsv();
+            }
+            else if (action == "Configure Tax Rate")
+            {
+                await ConfigureTaxRate();
             }
         }
 
@@ -66,6 +76,16 @@ namespace IM.MAUI.ViewModels
             }
         }
 
+        private async Task ConfigureTaxRate()
+        {
+            string result = await Application.Current.MainPage.DisplayPromptAsync("Configure Tax Rate", "Enter the sales tax rate (e.g., 0.05 for 5%):", initialValue: _shoppingCartProxy.TaxRate.ToString());
+
+            if (decimal.TryParse(result, out decimal taxRate))
+            {
+                _shoppingCartProxy.TaxRate = taxRate;
+            }
+        }
+
         public async Task<string> PickCsvFileAsync()
         {
             try
@@ -73,7 +93,7 @@ namespace IM.MAUI.ViewModels
                 var result = await FilePicker.PickAsync(new PickOptions
                 {
                     PickerTitle = "Pick a CSV file",
-                    FileTypes = new Microsoft.Maui.Storage.FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+                    FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
                     {
                         { DevicePlatform.WinUI, new[] { ".csv" } }
                     })
@@ -116,7 +136,7 @@ namespace IM.MAUI.ViewModels
                 };
 
                 _shopItemService.AddItem(item);
-                ReadItems();  
+                ReadItems();
             }
             else
             {
@@ -131,7 +151,7 @@ namespace IM.MAUI.ViewModels
             {
                 ShopItems.Add(item);
             }
-            OnPropertyChanged(nameof(ShopItems));  
+            OnPropertyChanged(nameof(ShopItems));
         }
 
         private async void UpdateItem()
@@ -153,7 +173,7 @@ namespace IM.MAUI.ViewModels
             if (int.TryParse(amountString, out int amount)) SelectedShopItem.Amount = amount;
 
             _shopItemService.UpdateItem(SelectedShopItem);
-            ReadItems();  
+            ReadItems();
         }
 
         private async void DeleteItem()
@@ -168,7 +188,7 @@ namespace IM.MAUI.ViewModels
             if (confirm)
             {
                 _shopItemService.DeleteItem(SelectedShopItem.Id);
-                ReadItems();  
+                ReadItems();
             }
         }
 
