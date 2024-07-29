@@ -6,7 +6,7 @@ namespace InventoryManagementApp
     internal class Program
     {
         private static IShopItemService _shopItemService = new ShopItemService();
-        private static ShoppingCartProxy _shoppingCartProxy = ShoppingCartProxy.Instance;
+        private static ShoppingCartProxy _shoppingCartProxy = new ShoppingCartProxy();
 
         static void Main(string[] args)
         {
