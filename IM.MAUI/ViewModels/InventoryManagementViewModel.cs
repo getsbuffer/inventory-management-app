@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using IM.Library.Models;
+using IM.Library.DTO;
 using IM.Library.Services;
 using IM.MAUI.Views;
 
@@ -14,10 +14,10 @@ namespace IM.MAUI.ViewModels
         private readonly ShoppingCartProxy _shoppingCartProxy;
         private decimal _taxRate;
 
-        public ObservableCollection<ShopItem> ShopItems { get; set; }
+        public ObservableCollection<ShopItemDTO> ShopItems { get; set; }
 
-        private ShopItem _selectedShopItem;
-        public ShopItem SelectedShopItem
+        private ShopItemDTO _selectedShopItem;
+        public ShopItemDTO SelectedShopItem
         {
             get => _selectedShopItem;
             set
@@ -42,12 +42,12 @@ namespace IM.MAUI.ViewModels
         {
             _shopItemService = shopItemService;
             _shoppingCartProxy = shoppingCartProxy;
-            ShopItems = new ObservableCollection<ShopItem>(_shopItemService.GetAllItems());
+            ShopItems = new ObservableCollection<ShopItemDTO>(_shopItemService.GetAllItems());
 
-            CreateItemCommand = new Command(CreateItem);
+            CreateItemCommand = new Command(async () => await CreateItem());
             ReadItemsCommand = new Command(ReadItems);
-            UpdateItemCommand = new Command(UpdateItem);
-            DeleteItemCommand = new Command(DeleteItem);
+            UpdateItemCommand = new Command(async () => await UpdateItem());
+            DeleteItemCommand = new Command(async () => await DeleteItem());
             NavigateToMainMenuCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(MainPage)));
             ShowMenuCommand = new Command(async () => await ShowMenu());
             ImportCsvCommand = new Command(async () => await ImportCsv());
@@ -161,7 +161,7 @@ namespace IM.MAUI.ViewModels
             }
         }
 
-        private async void CreateItem()
+        private async Task CreateItem()
         {
             string name = await Application.Current.MainPage.DisplayPromptAsync("Create Item", "Enter item name:");
             if (name == null) return;
@@ -177,7 +177,7 @@ namespace IM.MAUI.ViewModels
 
             if (decimal.TryParse(priceString, out decimal price) && int.TryParse(amountString, out int amount))
             {
-                var item = new ShopItem
+                var item = new ShopItemDTO
                 {
                     Id = _shopItemService.GetAllItems().Count() + 1,
                     Name = name,
@@ -205,7 +205,7 @@ namespace IM.MAUI.ViewModels
             OnPropertyChanged(nameof(ShopItems));
         }
 
-        private async void UpdateItem()
+        private async Task UpdateItem()
         {
             if (SelectedShopItem == null)
             {
@@ -227,7 +227,7 @@ namespace IM.MAUI.ViewModels
             ReadItems();
         }
 
-        private async void DeleteItem()
+        private async Task DeleteItem()
         {
             if (SelectedShopItem == null)
             {
