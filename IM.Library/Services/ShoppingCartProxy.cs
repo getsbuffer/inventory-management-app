@@ -4,35 +4,60 @@ namespace IM.Library.Services
 {
     public class ShoppingCartProxy
     {
-        private static ShoppingCartProxy? _instance;
-        private static readonly object _lock = new object();
         private ShoppingCart _cart;
+        private readonly List<ShoppingCart> _wishLists;
+        private int _nextWishlistId;
+        private readonly ShopItemService _shopItemService;
+
         public decimal TaxRate { get; set; }
 
-        private ShoppingCartProxy()
+        public ShoppingCartProxy(ShopItemService shopItemService)
         {
             _cart = new ShoppingCart { Id = 1 };
+            _wishLists = new List<ShoppingCart>();
+            _nextWishlistId = 1;
             TaxRate = 0;
-        }
-
-        public static ShoppingCartProxy Instance
-        {
-            get
-            {
-                lock (_lock)
-                {
-                    if (_instance == null)
-                    {
-                        _instance = new ShoppingCartProxy();
-                    }
-                    return _instance;
-                }
-            }
+            _shopItemService = shopItemService;
         }
 
         public ShoppingCart GetCart()
         {
             return _cart;
+        }
+
+        public void SetCurrentCart(ShoppingCart cart)
+        {
+            _cart = cart;
+        }
+
+        public int SaveWishlist(ShoppingCart cart)
+        {
+            var newWishlist = new ShoppingCart
+            {
+                Id = _nextWishlistId++,
+                Items = cart.Items.Select(item => new ShoppingCartItem
+                {
+                    Id = item.Id,
+                    Item = item.Item,
+                    Amount = item.Amount
+                }).ToList()
+            };
+            _wishLists.Add(newWishlist);
+            return newWishlist.Id;
+        }
+
+        public ShoppingCart GetWishlistById(int id)
+        {
+            return _wishLists.FirstOrDefault(wl => wl.Id == id);
+        }
+
+        public void RemoveWishlistById(int id)
+        {
+            var wishlist = _wishLists.FirstOrDefault(wl => wl.Id == id);
+            if (wishlist != null)
+            {
+                _wishLists.Remove(wishlist);
+            }
         }
 
         public void AddItemToCart(ShopItem item, int amount)
@@ -77,6 +102,31 @@ namespace IM.Library.Services
         public void ClearCart()
         {
             _cart.Items.Clear();
+        }
+
+        public void ReturnItemsToShop()
+        {
+            foreach (var item in _cart.Items)
+            {
+                var shopItem = _shopItemService.GetItemById(item.Item.Id);
+                if (shopItem != null)
+                {
+                    shopItem.Amount += item.Amount;
+                    _shopItemService.UpdateItem(shopItem);
+                }
+                else
+                {
+                    _shopItemService.AddItem(new ShopItem
+                    {
+                        Id = item.Item.Id,
+                        Name = item.Item.Name,
+                        Desc = item.Item.Desc,
+                        Price = item.Item.Price,
+                        Amount = item.Amount,
+                        IsBogo = item.Item.IsBogo
+                    });
+                }
+            }
         }
     }
 }

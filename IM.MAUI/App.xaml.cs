@@ -4,12 +4,10 @@
     {
         public static IServiceProvider Services { get; private set; }
 
-        public App()
+        public App(IServiceProvider serviceProvider)
         {
             InitializeComponent();
-
-            var mauiApp = MauiProgram.CreateMauiApp();
-            Services = mauiApp.Services;
+            Services = serviceProvider;
 
             MainPage = new AppShell();
         }

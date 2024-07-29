@@ -38,10 +38,10 @@ namespace IM.MAUI.ViewModels
         public ICommand ConfigureBogoCommand { get; }
         public ICommand MarkDownItemCommand { get; }
 
-        public InventoryManagementViewModel(ShopItemService shopItemService)
+        public InventoryManagementViewModel(ShopItemService shopItemService, ShoppingCartProxy shoppingCartProxy)
         {
             _shopItemService = shopItemService;
-            _shoppingCartProxy = ShoppingCartProxy.Instance;
+            _shoppingCartProxy = shoppingCartProxy;
             ShopItems = new ObservableCollection<ShopItem>(_shopItemService.GetAllItems());
 
             CreateItemCommand = new Command(CreateItem);
@@ -97,6 +97,7 @@ namespace IM.MAUI.ViewModels
                 _shoppingCartProxy.TaxRate = taxRate;
             }
         }
+
         private async Task ConfigureBogo()
         {
             string result = await Application.Current.MainPage.DisplayPromptAsync("Configure BOGO", "Enter the ID of the item to make BOGO:");
@@ -112,6 +113,7 @@ namespace IM.MAUI.ViewModels
                 }
             }
         }
+
         private async Task MarkDownItem()
         {
             string idResult = await Application.Current.MainPage.DisplayPromptAsync("Mark Down Item", "Enter the ID of the item to mark down:");
@@ -134,6 +136,7 @@ namespace IM.MAUI.ViewModels
                 ReadItems();
             }
         }
+
         public async Task<string> PickCsvFileAsync()
         {
             try
