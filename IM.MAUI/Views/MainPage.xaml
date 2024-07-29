@@ -22,6 +22,10 @@
             <Button Text="Shop"
                     Command="{Binding NavigateToShopCommand}"
                     Margin="10" />
+			
+			<Button Text="Subscriptions"
+					Command="{Binding NavigateToSubscriptionsCommand}"
+					Margin="10" />
         </VerticalStackLayout>
     </VerticalStackLayout>
 </ContentPage>

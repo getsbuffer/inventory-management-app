@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="IM.MAUI.Views.SubscriptionPage">
+
+    <ScrollView>
+        <VerticalStackLayout>
+            <Label Text="Subscriptions" 
+                   VerticalOptions="Start"
+                   HorizontalOptions="Center"
+                   Margin="10" />
+
+            <ListView ItemsSource="{Binding Subscriptions}" Margin="10" SelectedItem="{Binding SelectedSubscription}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <StackLayout Padding="10">
+                                <Label Text="{Binding ShopItemName}" FontAttributes="Bold" />
+                                <Label Text="{Binding Amount}" />
+                                <Label Text="{Binding Frequency}" />
+                                <Label Text="{Binding MonthlyCost, StringFormat='Monthly Cost: {0:C}'}" />
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Button Text="Add Subscription" Command="{Binding AddSubscriptionCommand}" Margin="10" />
+            <Button Text="Delete Subscription" Command="{Binding DeleteSubscriptionCommand}" Margin="10" />
+            <Button Text="Back to Main Menu" Command="{Binding NavigateToMainMenuCommand}" Margin="10" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

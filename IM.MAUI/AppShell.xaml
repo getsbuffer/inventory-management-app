@@ -8,4 +8,6 @@
     <ShellContent Title="Inventory Management" ContentTemplate="{DataTemplate views:InventoryManagementPage}" Route="InventoryManagementPage" />
     <ShellContent Title="Shop" ContentTemplate="{DataTemplate views:ShopPage}" Route="ShopPage" />
     <ShellContent Title="Cart" ContentTemplate="{DataTemplate views:CartPage}" Route="CartPage" />
+    <ShellContent Title="Subscription" ContentTemplate="{DataTemplate views:SubscriptionPage}" Route="SubscriptionPage" />
+
 </Shell>
