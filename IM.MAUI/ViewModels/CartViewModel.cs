@@ -14,8 +14,7 @@ namespace IM.MAUI.ViewModels
         private readonly ShoppingCartProxy _shoppingCartProxy;
 
         public ObservableCollection<ShoppingCartItem> CartItems { get; set; }
-        public decimal Subtotal => _shoppingCartProxy.GetCart().TotalPrice;
-        public decimal TotalPrice => Subtotal + (Subtotal * _shoppingCartProxy.TaxRate);
+        public decimal TotalPrice => CalculateTotal();
 
         private string _notificationMessage;
         public string NotificationMessage
@@ -74,7 +73,18 @@ namespace IM.MAUI.ViewModels
             UpdateCartItems();
             await ShowNotification("Checkout successful");
         }
-
+        private decimal CalculateTotal()
+        {
+            var cart = _shoppingCartProxy.GetCart();
+            decimal total = 0;
+            foreach (var item in cart.Items)
+            {
+                int quantityToCharge = item.Item.IsBogo ? (item.Amount / 2) + (item.Amount % 2) : item.Amount;
+                total += item.Item.Price * quantityToCharge;
+            }
+            total += total * _shoppingCartProxy.TaxRate;
+            return total;
+        }
         private void UpdateCartItems()
         {
             CartItems.Clear();
