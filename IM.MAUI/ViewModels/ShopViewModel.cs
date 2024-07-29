@@ -104,11 +104,10 @@ namespace IM.MAUI.ViewModels
                 _shoppingCartProxy.AddItemToCart(item, amount);
                 item.Amount -= amount;
                 _shopItemService.UpdateItem(item);
-                UpdateCartItems();
-                await ShowNotification("Item added to cart");
-
                 OnPropertyChanged(nameof(ShopItems));
                 OnPropertyChanged(nameof(SelectedShopItem));
+                UpdateCartItems();
+                await ShowNotification("Item added to cart");
             }
         }
 
@@ -146,10 +145,6 @@ namespace IM.MAUI.ViewModels
             {
                 return;
             }
-
-            decimal subtotal = cart.TotalPrice;
-            decimal tax = subtotal * 0.07m;
-            decimal total = subtotal + tax;
 
             _shoppingCartProxy.ClearCart();
             UpdateCartItems();
