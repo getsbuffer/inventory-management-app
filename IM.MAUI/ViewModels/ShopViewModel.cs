@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using IM.Library.DTO;
+using IM.Library.Helpers;
 using IM.Library.Models;
 using IM.Library.Services;
 using IM.MAUI.Views;
@@ -105,6 +106,9 @@ namespace IM.MAUI.ViewModels
                 _shopItemService.UpdateItem(item);
                 UpdateCartItems();
                 await ShowNotification("Item added to cart");
+
+                OnPropertyChanged(nameof(ShopItems));
+                OnPropertyChanged(nameof(SelectedShopItem));
             }
         }
 
