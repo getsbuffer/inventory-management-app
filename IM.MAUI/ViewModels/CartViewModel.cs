@@ -6,6 +6,7 @@ using IM.Library.Models;
 using IM.Library.Services;
 using IM.MAUI.Views;
 
+
 namespace IM.MAUI.ViewModels
 {
     public class CartViewModel : INotifyPropertyChanged
@@ -13,7 +14,8 @@ namespace IM.MAUI.ViewModels
         private readonly ShoppingCartProxy _shoppingCartProxy;
 
         public ObservableCollection<ShoppingCartItem> CartItems { get; set; }
-        public decimal TotalPrice => _shoppingCartProxy.GetCart().TotalPrice;
+        public decimal Subtotal => _shoppingCartProxy.GetCart().TotalPrice;
+        public decimal TotalPrice => Subtotal + (Subtotal * _shoppingCartProxy.TaxRate);
 
         private string _notificationMessage;
         public string NotificationMessage
@@ -89,7 +91,7 @@ namespace IM.MAUI.ViewModels
             NotificationMessage = message;
             IsNotificationVisible = true;
             OnPropertyChanged(nameof(NotificationMessage));
-            await Task.Delay(3000); 
+            await Task.Delay(3000);
             IsNotificationVisible = false;
             NotificationMessage = string.Empty;
             OnPropertyChanged(nameof(NotificationMessage));

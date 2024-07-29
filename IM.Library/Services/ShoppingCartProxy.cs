@@ -7,10 +7,12 @@ namespace IM.Library.Services
         private static ShoppingCartProxy? _instance;
         private static readonly object _lock = new object();
         private ShoppingCart _cart;
+        public decimal TaxRate { get; set; }
 
         private ShoppingCartProxy()
         {
-            _cart = new ShoppingCart { Id = 1 }; 
+            _cart = new ShoppingCart { Id = 1 };
+            TaxRate = 0;
         }
 
         public static ShoppingCartProxy Instance
