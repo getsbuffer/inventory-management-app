@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using IM.Library.DTO;
+using Microsoft.EntityFrameworkCore;
+using IM.API.Database;
+using IM.Library.Models;
 
 namespace IM.API.Controllers
 {
@@ -7,60 +9,79 @@ namespace IM.API.Controllers
     [ApiController]
     public class InventoryController : ControllerBase
     {
-        private static List<ShopItemDTO> _items = new List<ShopItemDTO>();
+        private readonly AppDbContext _context;
+
+        public InventoryController(AppDbContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
-        public ActionResult<IEnumerable<ShopItemDTO>> Get()
+        public async Task<ActionResult<IEnumerable<ShopItem>>> Get()
         {
-            return Ok(_items);
+            return await _context.ShopItems.ToListAsync();
         }
 
         [HttpGet("{id}")]
-        public ActionResult<ShopItemDTO> Get(int id)
+        public async Task<ActionResult<ShopItem>> Get(int id)
         {
-            var item = _items.Find(i => i.Id == id);
+            var item = await _context.ShopItems.FindAsync(id);
             if (item == null) return NotFound();
-            return Ok(item);
+            return item;
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] ShopItemDTO item)
+        public async Task<ActionResult<ShopItem>> Post([FromBody] ShopItem item)
         {
-            _items.Add(item);
-            return Ok();
+            _context.ShopItems.Add(item);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(Get), new { id = item.Id }, item);
         }
 
         [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody] ShopItemDTO item)
+        public async Task<IActionResult> Put(int id, [FromBody] ShopItem item)
         {
             if (id != item.Id)
             {
                 return BadRequest("Item ID mismatch.");
             }
 
-            var existingItem = _items.Find(i => i.Id == id);
-            if (existingItem == null)
-            {
-                return NotFound();
-            }
+            _context.Entry(item).State = EntityState.Modified;
 
-            existingItem.Name = item.Name;
-            existingItem.Desc = item.Desc;
-            existingItem.Price = item.Price;
-            existingItem.Amount = item.Amount;
-            existingItem.IsBogo = item.IsBogo;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ShopItemExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var item = _items.Find(i => i.Id == id);
+            var item = await _context.ShopItems.FindAsync(id);
             if (item == null) return NotFound();
 
-            _items.Remove(item);
-            return Ok();
+            _context.ShopItems.Remove(item);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool ShopItemExists(int id)
+        {
+            return _context.ShopItems.Any(e => e.Id == id);
         }
     }
 }
