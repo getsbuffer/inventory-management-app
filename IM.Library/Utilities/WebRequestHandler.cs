@@ -1,11 +1,8 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
-using static System.Net.WebRequestMethods;
 
-namespace PM.Library.Utilities
+
+namespace IM.Library.Utilities
 {
     public class WebRequestHandler
     {

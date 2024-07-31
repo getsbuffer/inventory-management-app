@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using IM.Library.DTO;
 using IM.Library.Services;
+using IM.Library.Utilities;
 using IM.MAUI.Views;
 
 namespace IM.MAUI.ViewModels
@@ -12,8 +13,6 @@ namespace IM.MAUI.ViewModels
     {
         private readonly ShopItemService _shopItemService;
         private readonly ShoppingCartProxy _shoppingCartProxy;
-        private decimal _taxRate;
-
         public ObservableCollection<ShopItemDTO> ShopItems { get; set; }
 
         private ShopItemDTO _selectedShopItem;
