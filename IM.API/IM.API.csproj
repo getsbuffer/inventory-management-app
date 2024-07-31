@@ -15,4 +15,8 @@
     <ProjectReference Include="..\IM.Library\IM.Library.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Database\Migrations\" />
+  </ItemGroup>
+
 </Project>
