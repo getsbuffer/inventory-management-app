@@ -1,4 +1,5 @@
 ﻿using IM.Library.Services;
+using IM.Library.Utilities;
 using IM.MAUI.ViewModels;
 
 namespace IM.MAUI
@@ -16,6 +17,7 @@ namespace IM.MAUI
                 });
 
             builder.Services.AddSingleton<ShopItemService>();
+            builder.Services.AddSingleton<WebRequestHandler>();
             builder.Services.AddSingleton<ShoppingCartProxy>();
             builder.Services.AddSingleton<SubscriptionService>();
             builder.Services.AddTransient<InventoryManagementViewModel>();

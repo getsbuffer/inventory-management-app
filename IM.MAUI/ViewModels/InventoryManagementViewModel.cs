@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using IM.Library.DTO;
 using IM.Library.Services;
-using IM.Library.Utilities;
 using IM.MAUI.Views;
 
 namespace IM.MAUI.ViewModels
@@ -12,7 +11,6 @@ namespace IM.MAUI.ViewModels
     public class InventoryManagementViewModel : INotifyPropertyChanged
     {
         private readonly ShopItemService _shopItemService;
-        private readonly ShoppingCartProxy _shoppingCartProxy;
         public ObservableCollection<ShopItemDTO> ShopItems { get; set; }
 
         private ShopItemDTO _selectedShopItem;
@@ -31,23 +29,25 @@ namespace IM.MAUI.ViewModels
         public ICommand UpdateItemCommand { get; }
         public ICommand DeleteItemCommand { get; }
         public ICommand NavigateToMainMenuCommand { get; }
-    
 
-        public InventoryManagementViewModel(ShopItemService shopItemService, ShoppingCartProxy shoppingCartProxy)
+        public InventoryManagementViewModel(ShopItemService shopItemService)
         {
             _shopItemService = shopItemService;
-            _shoppingCartProxy = shoppingCartProxy;
-            ShopItems = new ObservableCollection<ShopItemDTO>(_shopItemService.GetAllItems());
-
-            CreateItemCommand = new Command(async () => await CreateItem());
-            ReadItemsCommand = new Command(ReadItems);
-            UpdateItemCommand = new Command(async () => await UpdateItem());
-            DeleteItemCommand = new Command(async () => await DeleteItem());
+            ShopItems = new ObservableCollection<ShopItemDTO>();
+            CreateItemCommand = new Command(async () => await CreateItemAsync());
+            ReadItemsCommand = new Command(async () => await ReadItemsAsync());
+            UpdateItemCommand = new Command(async () => await UpdateItemAsync());
+            DeleteItemCommand = new Command(async () => await DeleteItemAsync());
             NavigateToMainMenuCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(MainPage)));
-
+            LoadItemsAsync();
         }
 
-        private async Task CreateItem()
+        private async Task LoadItemsAsync()
+        {
+            await ReadItemsAsync();
+        }
+
+        private async Task CreateItemAsync()
         {
             string name = await Application.Current.MainPage.DisplayPromptAsync("Create Item", "Enter item name:");
             if (name == null) return;
@@ -65,15 +65,14 @@ namespace IM.MAUI.ViewModels
             {
                 var item = new ShopItemDTO
                 {
-                    Id = _shopItemService.GetAllItems().Count() + 1,
                     Name = name,
                     Desc = description,
                     Price = price,
                     Amount = amount
                 };
 
-                _shopItemService.AddItem(item);
-                ReadItems();
+                await _shopItemService.AddOrUpdateItemAsync(item);
+                await ReadItemsAsync();
             }
             else
             {
@@ -81,17 +80,18 @@ namespace IM.MAUI.ViewModels
             }
         }
 
-        private void ReadItems()
+        private async Task ReadItemsAsync()
         {
+            var items = await _shopItemService.GetAllItemsAsync();
             ShopItems.Clear();
-            foreach (var item in _shopItemService.GetAllItems())
+            foreach (var item in items)
             {
                 ShopItems.Add(item);
             }
             OnPropertyChanged(nameof(ShopItems));
         }
 
-        private async Task UpdateItem()
+        private async Task UpdateItemAsync()
         {
             if (SelectedShopItem == null)
             {
@@ -109,11 +109,11 @@ namespace IM.MAUI.ViewModels
             if (decimal.TryParse(priceString, out decimal price)) SelectedShopItem.Price = price;
             if (int.TryParse(amountString, out int amount)) SelectedShopItem.Amount = amount;
 
-            _shopItemService.UpdateItem(SelectedShopItem);
-            ReadItems();
+            await _shopItemService.AddOrUpdateItemAsync(SelectedShopItem);
+            await ReadItemsAsync();
         }
 
-        private async Task DeleteItem()
+        private async Task DeleteItemAsync()
         {
             if (SelectedShopItem == null)
             {
@@ -124,8 +124,8 @@ namespace IM.MAUI.ViewModels
             bool confirm = await Application.Current.MainPage.DisplayAlert("Delete Item", $"Are you sure you want to delete {SelectedShopItem.Name}?", "Yes", "No");
             if (confirm)
             {
-                _shopItemService.DeleteItem(SelectedShopItem.Id);
-                ReadItems();
+                await _shopItemService.DeleteItemAsync(SelectedShopItem.Id);
+                await ReadItemsAsync();
             }
         }
 

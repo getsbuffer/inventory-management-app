@@ -1,54 +1,43 @@
 ﻿using IM.Library.DTO;
+using IM.Library.Utilities;
+using Newtonsoft.Json;
 
-namespace IM.API.EC
+public class InventoryEC
 {
-    public class InventoryEC
+    private readonly WebRequestHandler _webRequestHandler;
+
+    public InventoryEC()
     {
-        private static List<ShopItemDTO> _inventory = new List<ShopItemDTO>();
+        _webRequestHandler = new WebRequestHandler();
+    }
 
-        public IEnumerable<ShopItemDTO> GetAllItems()
-        {
-            return _inventory;
-        }
+    public async Task<IEnumerable<ShopItemDTO>> GetAllItemsAsync()
+    {
+        string result = await _webRequestHandler.Get("/api/inventory");
+        return result != null ? JsonConvert.DeserializeObject<IEnumerable<ShopItemDTO>>(result) : new List<ShopItemDTO>();
+    }
 
-        public ShopItemDTO GetItemById(int id)
-        {
-            return _inventory.FirstOrDefault(item => item.Id == id);
-        }
+    public async Task<ShopItemDTO> GetItemByIdAsync(int id)
+    {
+        string result = await _webRequestHandler.Get($"/api/inventory/{id}");
+        return result != null ? JsonConvert.DeserializeObject<ShopItemDTO>(result) : null;
+    }
 
-        public ShopItemDTO AddItem(ShopItemDTO newItem)
-        {
-            newItem.Id = _inventory.Any() ? _inventory.Max(item => item.Id) + 1 : 1;
-            _inventory.Add(newItem);
-            return newItem;
-        }
+    public async Task<bool> AddItemAsync(ShopItemDTO item)
+    {
+        string result = await _webRequestHandler.Post("/api/inventory", item);
+        return result != null && result != "ERROR";
+    }
 
-        public bool UpdateItem(int id, ShopItemDTO updatedItem)
-        {
-            var existingItem = _inventory.FirstOrDefault(item => item.Id == id);
-            if (existingItem == null)
-            {
-                return false;
-            }
+    public async Task<bool> UpdateItemAsync(ShopItemDTO item)
+    {
+        string result = await _webRequestHandler.Put($"/api/inventory/{item.Id}", item);
+        return result != null && result != "ERROR";
+    }
 
-            existingItem.Name = updatedItem.Name;
-            existingItem.Desc = updatedItem.Desc;
-            existingItem.Price = updatedItem.Price;
-            existingItem.Amount = updatedItem.Amount;
-
-            return true;
-        }
-
-        public bool DeleteItem(int id)
-        {
-            var item = _inventory.FirstOrDefault(i => i.Id == id);
-            if (item == null)
-            {
-                return false;
-            }
-
-            _inventory.Remove(item);
-            return true;
-        }
+    public async Task<bool> DeleteItemAsync(int id)
+    {
+        string result = await _webRequestHandler.Delete($"/api/inventory/{id}");
+        return result != null && result != "ERROR";
     }
 }

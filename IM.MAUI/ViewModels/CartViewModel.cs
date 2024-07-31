@@ -15,8 +15,7 @@ namespace IM.MAUI.ViewModels
         private readonly ShoppingCartProxy _shoppingCartProxy;
 
         public ObservableCollection<ShoppingCartItem> CartItems { get; set; }
-        public decimal Subtotal => _shoppingCartProxy.GetCart().TotalPrice;
-        public decimal Total => CalculateTotal();
+        public decimal TotalPrice => _shoppingCartProxy.CalculateTotalPrice();
 
         private string _notificationMessage;
         public string NotificationMessage
@@ -62,13 +61,13 @@ namespace IM.MAUI.ViewModels
             _shoppingCartProxy = shoppingCartProxy;
             CartItems = new ObservableCollection<ShoppingCartItem>(_shoppingCartProxy.GetCart().Items);
 
-            CheckoutCommand = new Command(Checkout);
+            CheckoutCommand = new Command(async () => await Checkout());
             NavigateToShopCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(ShopPage)));
-            SaveWishlistCommand = new Command(SaveWishlist);
+            SaveWishlistCommand = new Command(async () => await SaveWishlist());
             LoadWishlistCommand = new Command(async () => await LoadWishlist());
         }
 
-        private async void Checkout()
+        private async Task Checkout()
         {
             var cart = _shoppingCartProxy.GetCart();
             if (!cart.Items.Any())
@@ -81,7 +80,7 @@ namespace IM.MAUI.ViewModels
             await ShowNotification("Checkout successful");
         }
 
-        private async void SaveWishlist()
+        private async Task SaveWishlist()
         {
             var cart = _shoppingCartProxy.GetCart();
             if (!cart.Items.Any())
@@ -105,7 +104,7 @@ namespace IM.MAUI.ViewModels
                 var wishlist = _shoppingCartProxy.GetWishlistById(wishlistId);
                 if (wishlist != null)
                 {
-                    ReturnItemsToShop();
+                    await ReturnItemsToShopAsync();
 
                     _shoppingCartProxy.SetCurrentCart(wishlist);
                     _shoppingCartProxy.RemoveWishlistById(wishlistId);
@@ -123,20 +122,20 @@ namespace IM.MAUI.ViewModels
             }
         }
 
-        private void ReturnItemsToShop()
+        private async Task ReturnItemsToShopAsync()
         {
             var cart = _shoppingCartProxy.GetCart();
             foreach (var item in cart.Items)
             {
-                var shopItem = _shopItemService.GetItemById(item.Item.Id);
+                var shopItem = await _shopItemService.GetItemByIdAsync(item.Item.Id);
                 if (shopItem != null)
                 {
                     shopItem.Amount += item.Amount;
-                    _shopItemService.UpdateItem(shopItem);
+                    await _shopItemService.AddOrUpdateItemAsync(shopItem);
                 }
                 else
                 {
-                    _shopItemService.AddItem(new ShopItemDTO
+                    await _shopItemService.AddOrUpdateItemAsync(new ShopItemDTO
                     {
                         Id = item.Item.Id,
                         Name = item.Item.Name,
@@ -148,20 +147,6 @@ namespace IM.MAUI.ViewModels
                 }
             }
         }
-
-        private decimal CalculateTotal()
-        {
-            var cart = _shoppingCartProxy.GetCart();
-            decimal total = 0;
-            foreach (var item in cart.Items)
-            {
-                int quantityToCharge = item.Item.IsBogo ? (item.Amount / 2) + (item.Amount % 2) : item.Amount;
-                total += item.Item.Price * quantityToCharge;
-            }
-            total += total * _shoppingCartProxy.TaxRate;
-            return total;
-        }
-
         private void UpdateCartItems()
         {
             CartItems.Clear();
@@ -170,7 +155,7 @@ namespace IM.MAUI.ViewModels
                 CartItems.Add(item);
             }
             OnPropertyChanged(nameof(CartItems));
-            OnPropertyChanged(nameof(Total));
+            OnPropertyChanged(nameof(TotalPrice));
         }
 
         private async Task ShowNotification(string message)

@@ -1,6 +1,7 @@
 ﻿using System.Windows.Input;
 using IM.Library.Services;
 using IM.MAUI.Views;
+using System.Threading.Tasks;
 
 namespace IM.MAUI.ViewModels
 {
@@ -31,6 +32,7 @@ namespace IM.MAUI.ViewModels
             ConfigureBogoCommand = new Command(async () => await ConfigureBogo());
             MarkDownItemCommand = new Command(async () => await MarkDownItem());
         }
+
         private async Task ShowMenu()
         {
             var action = await Application.Current.MainPage.DisplayActionSheet("Options", "Cancel", null, "Import CSV", "Configure Tax Rate", "Configure BOGO", "Mark down an item");
@@ -58,7 +60,7 @@ namespace IM.MAUI.ViewModels
             string filePath = await PickCsvFileAsync();
             if (filePath != null)
             {
-                _shopItemService.ImportItemsFromCsv(filePath);
+                await _shopItemService.ImportItemsFromCsvAsync(filePath);
             }
         }
 
@@ -78,11 +80,11 @@ namespace IM.MAUI.ViewModels
 
             if (int.TryParse(result, out int itemId))
             {
-                var item = _shopItemService.GetItemById(itemId);
+                var item = await _shopItemService.GetItemByIdAsync(itemId);
                 if (item != null)
                 {
                     item.IsBogo = true;
-                    _shopItemService.UpdateItem(item);
+                    await _shopItemService.AddOrUpdateItemAsync(item);
                 }
             }
         }
@@ -101,11 +103,11 @@ namespace IM.MAUI.ViewModels
                 return;
             }
 
-            var item = _shopItemService.GetItemById(itemId);
+            var item = await _shopItemService.GetItemByIdAsync(itemId);
             if (item != null)
             {
                 item.Price -= item.Price * markdownPercentage;
-                _shopItemService.UpdateItem(item);
+                await _shopItemService.AddOrUpdateItemAsync(item);
             }
         }
 
@@ -122,12 +124,9 @@ namespace IM.MAUI.ViewModels
                     })
                 });
 
-                if (result == null)
-                    return null;
-
-                return result.FullPath;
+                return result?.FullPath;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }

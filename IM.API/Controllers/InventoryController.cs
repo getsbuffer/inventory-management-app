@@ -1,6 +1,5 @@
-﻿using IM.API.EC;
+﻿using Microsoft.AspNetCore.Mvc;
 using IM.Library.DTO;
-using Microsoft.AspNetCore.Mvc;
 
 namespace IM.API.Controllers
 {
@@ -8,58 +7,60 @@ namespace IM.API.Controllers
     [ApiController]
     public class InventoryController : ControllerBase
     {
-        private readonly InventoryEC _inventoryEC;
-
-        public InventoryController()
-        {
-            _inventoryEC = new InventoryEC();
-        }
+        private static List<ShopItemDTO> _items = new List<ShopItemDTO>();
 
         [HttpGet]
-        public ActionResult<IEnumerable<ShopItemDTO>> GetAllItems()
+        public ActionResult<IEnumerable<ShopItemDTO>> Get()
         {
-            var items = _inventoryEC.GetAllItems();
-            return Ok(items);
+            return Ok(_items);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<ShopItemDTO> GetItemById(int id)
+        public ActionResult<ShopItemDTO> Get(int id)
         {
-            var item = _inventoryEC.GetItemById(id);
-            if (item == null)
-            {
-                return NotFound();
-            }
+            var item = _items.Find(i => i.Id == id);
+            if (item == null) return NotFound();
             return Ok(item);
         }
 
         [HttpPost]
-        public ActionResult<ShopItemDTO> AddItem([FromBody] ShopItemDTO newItem)
+        public ActionResult Post([FromBody] ShopItemDTO item)
         {
-            var addedItem = _inventoryEC.AddItem(newItem);
-            return CreatedAtAction(nameof(GetItemById), new { id = addedItem.Id }, addedItem);
+            _items.Add(item);
+            return Ok();
         }
 
         [HttpPut("{id}")]
-        public ActionResult UpdateItem(int id, [FromBody] ShopItemDTO updatedItem)
+        public ActionResult Put(int id, [FromBody] ShopItemDTO item)
         {
-            var result = _inventoryEC.UpdateItem(id, updatedItem);
-            if (!result)
+            if (id != item.Id)
+            {
+                return BadRequest("Item ID mismatch.");
+            }
+
+            var existingItem = _items.Find(i => i.Id == id);
+            if (existingItem == null)
             {
                 return NotFound();
             }
+
+            existingItem.Name = item.Name;
+            existingItem.Desc = item.Desc;
+            existingItem.Price = item.Price;
+            existingItem.Amount = item.Amount;
+            existingItem.IsBogo = item.IsBogo;
+
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public ActionResult DeleteItem(int id)
+        public ActionResult Delete(int id)
         {
-            var result = _inventoryEC.DeleteItem(id);
-            if (!result)
-            {
-                return NotFound();
-            }
-            return NoContent();
+            var item = _items.Find(i => i.Id == id);
+            if (item == null) return NotFound();
+
+            _items.Remove(item);
+            return Ok();
         }
     }
 }
