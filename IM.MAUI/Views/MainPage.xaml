@@ -4,10 +4,6 @@
              xmlns:vm="clr-namespace:IM.MAUI.ViewModels"
              x:Class="IM.MAUI.Views.MainPage">
 
-    <ContentPage.BindingContext>
-        <vm:MainViewModel />
-    </ContentPage.BindingContext>
-
     <VerticalStackLayout>
         <Label Text="Welcome to fake Amazon. You may manage the inventory or buy"
                VerticalOptions="Start"
@@ -28,5 +24,8 @@
 					Margin="10" />
         </VerticalStackLayout>
     </VerticalStackLayout>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Options" Command="{Binding ShowMenuCommand}" />
+    </ContentPage.ToolbarItems>
 </ContentPage>
     

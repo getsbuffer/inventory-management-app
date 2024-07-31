@@ -39,7 +39,4 @@
             </ListView>
         </VerticalStackLayout>
     </ScrollView>
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Options" Command="{Binding ShowMenuCommand}" />
-    </ContentPage.ToolbarItems>
 </ContentPage>
