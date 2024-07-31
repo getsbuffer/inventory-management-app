@@ -35,21 +35,26 @@ namespace IM.MAUI.ViewModels
             _subscriptionService = subscriptionService;
             _shopItemService = shopItemService;
 
-            Subscriptions = new ObservableCollection<Subscription>(
-                _subscriptionService.GetAllSubscriptions().Select(sub =>
-                {
-                    var shopItem = _shopItemService.GetItemById(sub.ShopItemId);
-                    sub.ShopItemName = shopItem?.Name ?? "Unknown";
-                    return sub;
-                })
-            );
+            Subscriptions = new ObservableCollection<Subscription>();
+            LoadSubscriptionsAsync();
 
-            AddSubscriptionCommand = new Command(AddSubscription);
-            DeleteSubscriptionCommand = new Command(DeleteSubscription);
+            AddSubscriptionCommand = new Command(async () => await AddSubscription());
+            DeleteSubscriptionCommand = new Command(async () => await DeleteSubscription());
             NavigateToMainMenuCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(MainPage)));
         }
 
-        private async void AddSubscription()
+        private async Task LoadSubscriptionsAsync()
+        {
+            var subscriptions = _subscriptionService.GetAllSubscriptions();
+            foreach (var sub in subscriptions)
+            {
+                var shopItem = await _shopItemService.GetItemByIdAsync(sub.ShopItemId);
+                sub.ShopItemName = shopItem?.Name ?? "Unknown";
+                Subscriptions.Add(sub);
+            }
+        }
+
+        private async Task AddSubscription()
         {
             string shopItemIdString = await Application.Current.MainPage.DisplayPromptAsync("Add Subscription", "Enter ShopItem ID:");
             if (!int.TryParse(shopItemIdString, out int shopItemId))
@@ -62,7 +67,7 @@ namespace IM.MAUI.ViewModels
             string[] frequencies = { "Daily", "Weekly", "Biweekly", "Monthly", "Yearly" };
             string frequency = await Application.Current.MainPage.DisplayActionSheet("Select Frequency", "Cancel", null, frequencies);
 
-            var shopItem = _shopItemService.GetItemById(shopItemId);
+            var shopItem = await _shopItemService.GetItemByIdAsync(shopItemId);
             if (shopItem != null)
             {
                 var subscription = new Subscription
@@ -81,7 +86,7 @@ namespace IM.MAUI.ViewModels
             }
         }
 
-        private async void DeleteSubscription()
+        private async Task DeleteSubscription()
         {
             if (SelectedSubscription == null)
             {

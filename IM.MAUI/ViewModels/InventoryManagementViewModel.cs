@@ -11,9 +11,6 @@ namespace IM.MAUI.ViewModels
     public class InventoryManagementViewModel : INotifyPropertyChanged
     {
         private readonly ShopItemService _shopItemService;
-        private readonly ShoppingCartProxy _shoppingCartProxy;
-        private decimal _taxRate;
-
         public ObservableCollection<ShopItemDTO> ShopItems { get; set; }
 
         private ShopItemDTO _selectedShopItem;
@@ -32,136 +29,25 @@ namespace IM.MAUI.ViewModels
         public ICommand UpdateItemCommand { get; }
         public ICommand DeleteItemCommand { get; }
         public ICommand NavigateToMainMenuCommand { get; }
-        public ICommand ShowMenuCommand { get; }
-        public ICommand ImportCsvCommand { get; }
-        public ICommand ConfigureTaxRateCommand { get; }
-        public ICommand ConfigureBogoCommand { get; }
-        public ICommand MarkDownItemCommand { get; }
 
-        public InventoryManagementViewModel(ShopItemService shopItemService, ShoppingCartProxy shoppingCartProxy)
+        public InventoryManagementViewModel(ShopItemService shopItemService)
         {
             _shopItemService = shopItemService;
-            _shoppingCartProxy = shoppingCartProxy;
-            ShopItems = new ObservableCollection<ShopItemDTO>(_shopItemService.GetAllItems());
-
-            CreateItemCommand = new Command(async () => await CreateItem());
-            ReadItemsCommand = new Command(ReadItems);
-            UpdateItemCommand = new Command(async () => await UpdateItem());
-            DeleteItemCommand = new Command(async () => await DeleteItem());
+            ShopItems = new ObservableCollection<ShopItemDTO>();
+            CreateItemCommand = new Command(async () => await CreateItemAsync());
+            ReadItemsCommand = new Command(async () => await ReadItemsAsync());
+            UpdateItemCommand = new Command(async () => await UpdateItemAsync());
+            DeleteItemCommand = new Command(async () => await DeleteItemAsync());
             NavigateToMainMenuCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(MainPage)));
-            ShowMenuCommand = new Command(async () => await ShowMenu());
-            ImportCsvCommand = new Command(async () => await ImportCsv());
-            ConfigureTaxRateCommand = new Command(async () => await ConfigureTaxRate());
-            ConfigureBogoCommand = new Command(async () => await ConfigureBogo());
-            MarkDownItemCommand = new Command(async () => await MarkDownItem());
+            LoadItemsAsync();
         }
 
-        private async Task ShowMenu()
+        private async Task LoadItemsAsync()
         {
-            var action = await Application.Current.MainPage.DisplayActionSheet("Options", "Cancel", null, "Import CSV", "Configure Tax Rate", "Configure BOGO", "Mark down an item");
-
-            if (action == "Import CSV")
-            {
-                await ImportCsv();
-            }
-            else if (action == "Configure Tax Rate")
-            {
-                await ConfigureTaxRate();
-            }
-            else if (action == "Configure BOGO")
-            {
-                await ConfigureBogo();
-            }
-            else if (action == "Mark down an item")
-            {
-                await MarkDownItem();
-            }
+            await ReadItemsAsync();
         }
 
-        private async Task ImportCsv()
-        {
-            string filePath = await PickCsvFileAsync();
-            if (filePath != null)
-            {
-                _shopItemService.ImportItemsFromCsv(filePath);
-                ReadItems();
-            }
-        }
-
-        private async Task ConfigureTaxRate()
-        {
-            string result = await Application.Current.MainPage.DisplayPromptAsync("Configure Tax Rate", "Enter the sales tax rate (e.g., 0.05 for 5%):", initialValue: _shoppingCartProxy.TaxRate.ToString());
-
-            if (decimal.TryParse(result, out decimal taxRate))
-            {
-                _shoppingCartProxy.TaxRate = taxRate;
-            }
-        }
-
-        private async Task ConfigureBogo()
-        {
-            string result = await Application.Current.MainPage.DisplayPromptAsync("Configure BOGO", "Enter the ID of the item to make BOGO:");
-
-            if (int.TryParse(result, out int itemId))
-            {
-                var item = _shopItemService.GetItemById(itemId);
-                if (item != null)
-                {
-                    item.IsBogo = true;
-                    _shopItemService.UpdateItem(item);
-                    ReadItems();
-                }
-            }
-        }
-
-        private async Task MarkDownItem()
-        {
-            string idResult = await Application.Current.MainPage.DisplayPromptAsync("Mark Down Item", "Enter the ID of the item to mark down:");
-            if (!int.TryParse(idResult, out int itemId))
-            {
-                return;
-            }
-
-            string percentResult = await Application.Current.MainPage.DisplayPromptAsync("Mark Down Item", "Enter the percentage to mark down (e.g., 0.10 for 10%):");
-            if (!decimal.TryParse(percentResult, out decimal markdownPercentage))
-            {
-                return;
-            }
-
-            var item = _shopItemService.GetItemById(itemId);
-            if (item != null)
-            {
-                item.Price -= item.Price * markdownPercentage;
-                _shopItemService.UpdateItem(item);
-                ReadItems();
-            }
-        }
-
-        public async Task<string> PickCsvFileAsync()
-        {
-            try
-            {
-                var result = await FilePicker.PickAsync(new PickOptions
-                {
-                    PickerTitle = "Pick a CSV file",
-                    FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
-                    {
-                        { DevicePlatform.WinUI, new[] { ".csv" } }
-                    })
-                });
-
-                if (result == null)
-                    return null;
-
-                return result.FullPath;
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-
-        private async Task CreateItem()
+        private async Task CreateItemAsync()
         {
             string name = await Application.Current.MainPage.DisplayPromptAsync("Create Item", "Enter item name:");
             if (name == null) return;
@@ -179,15 +65,14 @@ namespace IM.MAUI.ViewModels
             {
                 var item = new ShopItemDTO
                 {
-                    Id = _shopItemService.GetAllItems().Count() + 1,
                     Name = name,
                     Desc = description,
                     Price = price,
                     Amount = amount
                 };
 
-                _shopItemService.AddItem(item);
-                ReadItems();
+                await _shopItemService.AddOrUpdateItemAsync(item);
+                await ReadItemsAsync();
             }
             else
             {
@@ -195,17 +80,18 @@ namespace IM.MAUI.ViewModels
             }
         }
 
-        private void ReadItems()
+        private async Task ReadItemsAsync()
         {
+            var items = await _shopItemService.GetAllItemsAsync();
             ShopItems.Clear();
-            foreach (var item in _shopItemService.GetAllItems())
+            foreach (var item in items)
             {
                 ShopItems.Add(item);
             }
             OnPropertyChanged(nameof(ShopItems));
         }
 
-        private async Task UpdateItem()
+        private async Task UpdateItemAsync()
         {
             if (SelectedShopItem == null)
             {
@@ -223,11 +109,11 @@ namespace IM.MAUI.ViewModels
             if (decimal.TryParse(priceString, out decimal price)) SelectedShopItem.Price = price;
             if (int.TryParse(amountString, out int amount)) SelectedShopItem.Amount = amount;
 
-            _shopItemService.UpdateItem(SelectedShopItem);
-            ReadItems();
+            await _shopItemService.AddOrUpdateItemAsync(SelectedShopItem);
+            await ReadItemsAsync();
         }
 
-        private async Task DeleteItem()
+        private async Task DeleteItemAsync()
         {
             if (SelectedShopItem == null)
             {
@@ -238,8 +124,8 @@ namespace IM.MAUI.ViewModels
             bool confirm = await Application.Current.MainPage.DisplayAlert("Delete Item", $"Are you sure you want to delete {SelectedShopItem.Name}?", "Yes", "No");
             if (confirm)
             {
-                _shopItemService.DeleteItem(SelectedShopItem.Id);
-                ReadItems();
+                await _shopItemService.DeleteItemAsync(SelectedShopItem.Id);
+                await ReadItemsAsync();
             }
         }
 

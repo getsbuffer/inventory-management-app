@@ -1,66 +1,51 @@
-using IM.Library.Models;
-using IM.Library.DTO;
-using IM.Library.Helpers;
-using System.Globalization;
-using CsvHelper;
 using CsvHelper.Configuration;
+using CsvHelper;
+using IM.Library.DTO;
+using IM.Library.Utilities;
+using Newtonsoft.Json;
+using System.Globalization;
 
 namespace IM.Library.Services
 {
-    public interface IShopItemService
+    public class ShopItemService
     {
-        ShopItemDTO GetItemById(int id);
-        IEnumerable<ShopItemDTO> GetAllItems();
-        void AddItem(ShopItemDTO item);
-        void UpdateItem(ShopItemDTO item);
-        void DeleteItem(int id);
-        void ImportItemsFromCsv(string filePath);
-    }
+        private readonly WebRequestHandler _webRequestHandler;
 
-    public class ShopItemService : IShopItemService
-    {
-        private readonly List<ShopItem> _items = new List<ShopItem>();
-
-        public ShopItemDTO GetItemById(int id)
+        public ShopItemService(WebRequestHandler webRequestHandler)
         {
-            var item = _items.FirstOrDefault(x => x.Id == id);
-            return item?.ToDTO();
+            _webRequestHandler = webRequestHandler;
         }
 
-        public IEnumerable<ShopItemDTO> GetAllItems()
+        public async Task<IEnumerable<ShopItemDTO>> GetAllItemsAsync()
         {
-            return _items.Select(x => x.ToDTO());
+            string response = await _webRequestHandler.Get("/api/inventory");
+            return response != null ? JsonConvert.DeserializeObject<IEnumerable<ShopItemDTO>>(response) : new List<ShopItemDTO>();
         }
 
-        public void AddItem(ShopItemDTO shopItemDTO)
+        public async Task<ShopItemDTO> GetItemByIdAsync(int id)
         {
-            var item = shopItemDTO.ToModel();
-            _items.Add(item);
+            string response = await _webRequestHandler.Get($"/api/inventory/{id}");
+            return response != null ? JsonConvert.DeserializeObject<ShopItemDTO>(response) : null;
         }
-
-        public void UpdateItem(ShopItemDTO shopItemDTO)
+        public async Task AddOrUpdateItemAsync(ShopItemDTO item)
         {
-            var existingItem = _items.FirstOrDefault(x => x.Id == shopItemDTO.Id);
+            var existingItem = await GetItemByIdAsync(item.Id);
             if (existingItem != null)
             {
-                existingItem.Name = shopItemDTO.Name;
-                existingItem.Desc = shopItemDTO.Desc;
-                existingItem.Price = shopItemDTO.Price;
-                existingItem.Amount = shopItemDTO.Amount;
-                existingItem.IsBogo = shopItemDTO.IsBogo;
+                await _webRequestHandler.Put($"/api/inventory/{item.Id}", item);
             }
-        }
-
-        public void DeleteItem(int id)
-        {
-            var item = _items.FirstOrDefault(x => x.Id == id);
-            if (item != null)
+            else
             {
-                _items.Remove(item);
+                await _webRequestHandler.Post("/api/inventory", item);
             }
         }
 
-        public void ImportItemsFromCsv(string filePath)
+        public async Task DeleteItemAsync(int id)
+        {
+            await _webRequestHandler.Delete($"/api/inventory/{id}");
+        }
+
+        public async Task ImportItemsFromCsvAsync(string filePath)
         {
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
@@ -69,14 +54,13 @@ namespace IM.Library.Services
                 MissingFieldFound = null
             };
 
-            using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, config))
+            using var reader = new StreamReader(filePath);
+            using var csv = new CsvReader(reader, config);
+            var records = csv.GetRecords<ShopItemDTO>();
+
+            foreach (var item in records)
             {
-                var records = csv.GetRecords<ShopItemDTO>();
-                foreach (var item in records)
-                {
-                    AddItem(item);
-                }
+                await AddOrUpdateItemAsync(item);
             }
         }
     }

@@ -1,9 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+
 using System.Windows.Input;
 using IM.Library.DTO;
-using IM.Library.Helpers;
 using IM.Library.Models;
 using IM.Library.Services;
 using IM.MAUI.Views;
@@ -62,8 +62,8 @@ namespace IM.MAUI.ViewModels
             }
         }
 
-        public ICommand AddItemToCartCommand { get; }
-        public ICommand RemoveItemFromCartCommand { get; }
+        public ICommand AddItemCommand { get; }
+        public ICommand RemoveItemCommand { get; }
         public ICommand ViewCartCommand { get; }
         public ICommand CheckoutCommand { get; }
         public ICommand NavigateToMainMenuCommand { get; }
@@ -72,23 +72,33 @@ namespace IM.MAUI.ViewModels
         {
             _shopItemService = shopItemService;
             _shoppingCartProxy = shoppingCartProxy;
-            ShopItems = new ObservableCollection<ShopItemDTO>(_shopItemService.GetAllItems());
+            ShopItems = new ObservableCollection<ShopItemDTO>();
             CartItems = new ObservableCollection<ShoppingCartItem>(_shoppingCartProxy.GetCart().Items);
 
-            AddItemToCartCommand = new Command(AddItemToCart);
-            RemoveItemFromCartCommand = new Command(RemoveItemFromCart);
+            AddItemCommand = new Command(async () => await AddItem());
+            RemoveItemCommand = new Command(async () => await RemoveItem());
             ViewCartCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(CartPage)));
             CheckoutCommand = new Command(Checkout);
             NavigateToMainMenuCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(MainPage)));
+            LoadItemsAsync();
         }
 
+        private async Task LoadItemsAsync()
+        {
+            var items = await _shopItemService.GetAllItemsAsync();
+            ShopItems.Clear();
+            foreach (var item in items)
+            {
+                ShopItems.Add(item);
+            }
+        }
 
-        private async void AddItemToCart()
+        private async Task AddItem()
         {
             if (SelectedShopItem != null)
             {
                 int amount = 1;
-                var item = _shopItemService.GetItemById(SelectedShopItem.Id);
+                var item = await _shopItemService.GetItemByIdAsync(SelectedShopItem.Id);
 
                 if (item == null)
                 {
@@ -103,7 +113,7 @@ namespace IM.MAUI.ViewModels
 
                 _shoppingCartProxy.AddItemToCart(item, amount);
                 item.Amount -= amount;
-                _shopItemService.UpdateItem(item);
+                await _shopItemService.AddOrUpdateItemAsync(item);
                 OnPropertyChanged(nameof(ShopItems));
                 OnPropertyChanged(nameof(SelectedShopItem));
                 UpdateCartItems();
@@ -111,12 +121,12 @@ namespace IM.MAUI.ViewModels
             }
         }
 
-        private async void RemoveItemFromCart()
+        private async Task RemoveItem()
         {
             if (SelectedShopItem != null)
             {
                 int amount = 1;
-                var item = _shopItemService.GetItemById(SelectedShopItem.Id);
+                var item = await _shopItemService.GetItemByIdAsync(SelectedShopItem.Id);
 
                 if (item == null)
                 {
@@ -132,7 +142,7 @@ namespace IM.MAUI.ViewModels
 
                 _shoppingCartProxy.RemoveItemFromCart(SelectedShopItem.Id);
                 item.Amount += amount;
-                _shopItemService.UpdateItem(item);
+                await _shopItemService.AddOrUpdateItemAsync(item);
                 UpdateCartItems();
                 await ShowNotification("Item removed from cart");
             }
@@ -161,7 +171,8 @@ namespace IM.MAUI.ViewModels
             OnPropertyChanged(nameof(TotalPrice));
         }
 
-        public decimal TotalPrice => _shoppingCartProxy.GetCart().TotalPrice;
+        public decimal TotalPrice => _shoppingCartProxy.CalculateTotalPrice();
+
 
         private async Task ShowNotification(string message)
         {

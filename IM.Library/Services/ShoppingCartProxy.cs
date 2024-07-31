@@ -31,6 +31,17 @@ namespace IM.Library.Services
         {
             _cart = cart;
         }
+        public decimal CalculateTotalPrice()
+        {
+            decimal total = 0;
+            foreach (var item in _cart.Items)
+            {
+                int quantityToCharge = item.Item.IsBogo ? (item.Amount / 2) + (item.Amount % 2) : item.Amount;
+                total += item.Item.Price * quantityToCharge;
+            }
+            total += total * TaxRate;
+            return total;
+        }
 
         public int SaveWishlist(ShoppingCart cart)
         {
@@ -62,7 +73,7 @@ namespace IM.Library.Services
             }
         }
 
-        public void AddItemToCart(ShopItemDTO itemDto, int amount)
+        public async Task AddItemToCart(ShopItemDTO itemDto, int amount)
         {
             var item = MappingHelper.ToModel(itemDto);
             var cartItem = _cart.Items.FirstOrDefault(i => i.Item?.Id == item.Id);
@@ -75,9 +86,16 @@ namespace IM.Library.Services
             {
                 cartItem.Amount += amount;
             }
+
+            var shopItemDto = await _shopItemService.GetItemByIdAsync(itemDto.Id);
+            if (shopItemDto != null)
+            {
+                shopItemDto.Amount -= amount;
+                await _shopItemService.AddOrUpdateItemAsync(shopItemDto);
+            }
         }
 
-        public void RemoveItemFromCart(int itemId)
+        public async Task RemoveItemFromCart(int itemId)
         {
             var cartItem = _cart.Items.FirstOrDefault(i => i.Item?.Id == itemId);
             if (cartItem != null)
@@ -89,6 +107,14 @@ namespace IM.Library.Services
                 else
                 {
                     _cart.Items.Remove(cartItem);
+                }
+
+                // Update the item amount in the shop
+                var shopItemDto = await _shopItemService.GetItemByIdAsync(itemId);
+                if (shopItemDto != null)
+                {
+                    shopItemDto.Amount += 1;
+                    await _shopItemService.AddOrUpdateItemAsync(shopItemDto);
                 }
             }
         }
@@ -107,16 +133,15 @@ namespace IM.Library.Services
             _cart.Items.Clear();
         }
 
-        public void ReturnItemsToShop()
+        public async Task ReturnItemsToShopAsync()
         {
             foreach (var item in _cart.Items)
             {
-                var shopItemDto = _shopItemService.GetItemById(item.Item.Id);
+                var shopItemDto = await _shopItemService.GetItemByIdAsync(item.Item.Id);
                 if (shopItemDto != null)
                 {
-                    var shopItem = MappingHelper.ToModel(shopItemDto);
-                    shopItem.Amount += item.Amount;
-                    _shopItemService.UpdateItem(MappingHelper.ToDTO(shopItem));
+                    shopItemDto.Amount += item.Amount;
+                    await _shopItemService.AddOrUpdateItemAsync(shopItemDto);
                 }
                 else
                 {
@@ -129,7 +154,7 @@ namespace IM.Library.Services
                         Amount = item.Amount,
                         IsBogo = item.Item.IsBogo
                     });
-                    _shopItemService.AddItem(newItemDto);
+                    await _shopItemService.AddOrUpdateItemAsync(newItemDto);
                 }
             }
         }
